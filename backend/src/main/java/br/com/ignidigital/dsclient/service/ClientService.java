@@ -3,8 +3,11 @@ package br.com.ignidigital.dsclient.service;
 import br.com.ignidigital.dsclient.dto.ClientDTO;
 import br.com.ignidigital.dsclient.entities.Client;
 import br.com.ignidigital.dsclient.repository.ClientRepository;
+import br.com.ignidigital.dsclient.service.exceptions.DatabaseException;
 import br.com.ignidigital.dsclient.service.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -58,4 +61,16 @@ public class ClientService implements Serializable {
 
     }
 
+    public void delete(Long id) {
+    try {
+        repository.deleteById(id);
+    }
+    catch (EmptyResultDataAccessException e) {
+        throw new ResourceNotFoundException("Error! Resource not found: "+id);
+    }
+    catch (DataIntegrityViolationException e) {
+        throw new DatabaseException("Error! Database Integrity violation");
+    }
+
+    }
 }
