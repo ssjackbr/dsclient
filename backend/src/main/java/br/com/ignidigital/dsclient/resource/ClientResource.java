@@ -8,8 +8,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.Serializable;
+import java.net.URI;
 
 @RestController
 @RequestMapping(value = "/clients")
@@ -27,17 +29,22 @@ public class ClientResource implements Serializable {
             @RequestParam(value = "direction", defaultValue = "ASC") String direction,
             @RequestParam(value = "orderBy", defaultValue = "name") String orderBy
     ) {
-
         PageRequest pageRequest = PageRequest.of(page, linesPerPage, Sort.Direction.valueOf(direction), orderBy);
         Page<ClientDTO> clientList = service.findAllPaged(pageRequest);
         return ResponseEntity.ok().body(clientList);
-
     }
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<ClientDTO> findById (@PathVariable Long id){
         ClientDTO dto = service.findById(id);
         return ResponseEntity.ok().body(dto);
+    }
+
+    @PostMapping
+    public ResponseEntity<ClientDTO> insert (@RequestBody ClientDTO dto){
+        dto = service.insert(dto);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto.getId()).toUri();
+        return ResponseEntity.created(uri).body(dto);
     }
 
     @PutMapping(value = "/{id}")
@@ -51,5 +58,4 @@ public class ClientResource implements Serializable {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
-
 }

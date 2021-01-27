@@ -10,7 +10,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,34 +42,38 @@ public class ClientService implements Serializable {
     try {
 
         Client entity = repository.getOne(id);
-        updateEntity(entity, dto);
-        entity = repository.save(entity);
-        return new ClientDTO(entity);
+        copyDtoToEntity(entity, dto);
+        return new ClientDTO(repository.save(entity));
 
         } catch ( EntityNotFoundException e) {
         throw new ResourceNotFoundException("Error! Entity not found: "+id);
      }
     }
 
-    private void updateEntity ( Client entity, ClientDTO dto) {
-         entity.setName(dto.getName());
-         entity.setCpf(dto.getCpf());
-         entity.setIncome(dto.getIncome());
-         entity.setBirthDate(dto.getBirthDate());
-         entity.setChildren(dto.getChildren());
-
-    }
-
     public void delete(Long id) {
     try {
         repository.deleteById(id);
-    }
-    catch (EmptyResultDataAccessException e) {
+        }
+        catch (EmptyResultDataAccessException e) {
         throw new ResourceNotFoundException("Error! Resource not found: "+id);
-    }
-    catch (DataIntegrityViolationException e) {
-        throw new DatabaseException("Error! Database Integrity violation");
+        }
+        catch (DataIntegrityViolationException e) {
+            throw new DatabaseException("Error! Database Integrity violation");
+        }
     }
 
+    @Transactional
+    public ClientDTO insert(ClientDTO dto) {
+        Client entity = new Client();
+        copyDtoToEntity(entity,dto);
+        return new ClientDTO(repository.save(entity));
+    }
+
+    private void copyDtoToEntity(Client entity, ClientDTO dto) {
+        entity.setName(dto.getName());
+        entity.setCpf(dto.getCpf());
+        entity.setIncome(dto.getIncome());
+        entity.setBirthDate(dto.getBirthDate());
+        entity.setChildren(dto.getChildren());
     }
 }
