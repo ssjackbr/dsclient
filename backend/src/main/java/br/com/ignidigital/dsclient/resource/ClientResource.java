@@ -1,7 +1,6 @@
 package br.com.ignidigital.dsclient.resource;
 
 import br.com.ignidigital.dsclient.dto.ClientDTO;
-import br.com.ignidigital.dsclient.entities.Client;
 import br.com.ignidigital.dsclient.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -38,6 +37,12 @@ public class ClientResource implements Serializable {
     @GetMapping(value = "/{id}")
     public ResponseEntity<ClientDTO> findById (@PathVariable Long id){
         ClientDTO dto = service.findById(id);
+        return ResponseEntity.ok().body(dto);
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<ClientDTO> update(@PathVariable Long id, @RequestBody ClientDTO dto){
+        dto = service.update(id, dto);
         return ResponseEntity.ok().body(dto);
     }
 

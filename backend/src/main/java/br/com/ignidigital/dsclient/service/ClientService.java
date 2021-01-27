@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.io.Serializable;
 import java.util.Optional;
 
@@ -30,7 +31,31 @@ public class ClientService implements Serializable {
     @Transactional (readOnly = true)
     public ClientDTO findById(Long id) {
         Optional<Client> objClient = repository.findById(id);
-        Client client = objClient.orElseThrow(() -> new ResourceNotFoundException("Entity not found!"));
+        Client client = objClient.orElseThrow(() -> new ResourceNotFoundException("Error! Entity not found: "+id));
         return new ClientDTO(client);
     }
+
+    @Transactional
+    public ClientDTO update(Long id, ClientDTO dto){
+    try {
+
+        Client entity = repository.getOne(id);
+        updateEntity(entity, dto);
+        entity = repository.save(entity);
+        return new ClientDTO(entity);
+
+        } catch ( EntityNotFoundException e) {
+        throw new ResourceNotFoundException("Error! Entity not found: "+id);
+     }
+    }
+
+    private void updateEntity ( Client entity, ClientDTO dto) {
+         entity.setName(dto.getName());
+         entity.setCpf(dto.getCpf());
+         entity.setIncome(dto.getIncome());
+         entity.setBirthDate(dto.getBirthDate());
+         entity.setChildren(dto.getChildren());
+
+    }
+
 }
